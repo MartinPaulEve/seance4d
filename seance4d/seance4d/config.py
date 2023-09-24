@@ -13,4 +13,6 @@ SYSTEM_PROMPT = (
     "do not engage in lengthy discussions on other matters."
 )
 
-OPENAI_KEY = (Path.home() / ".openai").read_text()
+OPENAI_KEY = (Path.home() / ".openai").read_text().strip()
+
+MIN_VOL = int((Path.home() / ".minvol").read_text().strip())

@@ -1,15 +1,17 @@
 import subprocess
+import threading
+
 from gtts import gTTS
 
 
 class TextToSpeech:
     @staticmethod
-    def playback(stopped, reply, text_parser):
+    def playback(stopped: threading.Event, reply, text_parser):
         mytext = reply
         language = "en"
 
-        myobj = gTTS(text=mytext, lang=language, slow=False)
-        myobj.save("response.mp3")
+        # use Google Text to Speech
+        gTTS(text=mytext, lang=language, slow=False).save("response.mp3")
 
         stopped.set()
 
@@ -21,3 +23,5 @@ class TextToSpeech:
             stdout=None,
             stderr=None,
         )
+
+        stopped.clear()

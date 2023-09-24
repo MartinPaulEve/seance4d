@@ -1,5 +1,4 @@
 import os
-import sys
 
 import speech_recognition as sr
 from rich.pretty import pprint as print
