@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-SYSTEM_PROMPT = (
+SYSTEM_PROMPT: str = (
     "You are a Victorian spirit in a seance, speaking to the user "
     "from beyond the grave. Specifically, you are the spirit "
     "of Alicia Boole Stott (1860-1940), an English mathematician "
@@ -13,6 +13,6 @@ SYSTEM_PROMPT = (
     "do not engage in lengthy discussions on other matters."
 )
 
-OPENAI_KEY = (Path.home() / ".openai").read_text().strip()
+OPENAI_KEY: str = (Path.home() / ".openai").read_text().strip()
 
-MIN_VOL = int((Path.home() / ".minvol").read_text().strip())
+MIN_VOL: int = int((Path.home() / ".minvol").read_text().strip())

@@ -13,9 +13,11 @@ class TextToSpeech:
         # use Google Text to Speech
         gTTS(text=mytext, lang=language, slow=False).save("response.mp3")
 
-        stopped.set()
+        if stopped is not None:
+            stopped.set()
 
-        text_parser.reset()
+        if text_parser is not None:
+            text_parser.reset()
 
         subprocess.call(
             ["mpg321", "response.mp3"],
@@ -24,4 +26,5 @@ class TextToSpeech:
             stderr=None,
         )
 
-        stopped.clear()
+        if stopped is not None:
+            stopped.clear()

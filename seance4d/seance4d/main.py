@@ -37,11 +37,11 @@ text_parser: TextParser = TextParser(
 )
 
 
-def main(threshold: bool = False, verbose: bool = False) -> None:
+def main(threshold: bool = False, verbose_mode: bool = False) -> None:
     """
     Main function for the program
     :param threshold: whether to display threshold volume information
-    :param verbose: whether to display verbose information
+    :param verbose_mode: whether to display verbose information
     :return: None
     """
     stopped: threading.Event = threading.Event()
@@ -50,7 +50,7 @@ def main(threshold: bool = False, verbose: bool = False) -> None:
     listen_t = threading.Thread(target=listen, args=(stopped, q))
     listen_t.start()
     record_t = threading.Thread(
-        target=record, args=(stopped, q, threshold, verbose)
+        target=record, args=(stopped, q, threshold, verbose_mode)
     )
     record_t.start()
 
@@ -102,7 +102,6 @@ def record(
         current_fail_count, current_voice_count, wf = check_success(
             current_fail_count,
             current_voice_count,
-            filename,
             silence_count,
             stopped,
             wf,
@@ -113,7 +112,6 @@ def record(
 def check_success(
     current_fail_count,
     current_voice_count,
-    filename,
     silence_count,
     stopped,
     wf,
@@ -123,7 +121,6 @@ def check_success(
     Check if the voice has been silent for long enough to close the file
     :param current_fail_count: the current fail count
     :param current_voice_count: the current voice count
-    :param filename: the filename
     :param silence_count: the silence count
     :param stopped: the stopped signal
     :param wf: the wave file
@@ -193,6 +190,7 @@ def check_voice_volume(
     :param chunk: the chunk of audio data
     :param wf: the wave file
     :param threshold: whether to display threshold volume information
+    :param verbose_mode: whether to display verbose information
     :return: the current fail count and the current voice count
     """
     vol = max(chunk)
@@ -290,7 +288,7 @@ def verbose() -> None:
     Run in verbose mode
     :return: None
     """
-    main(verbose=True)
+    main(verbose_mode=True)
 
 
 @click.group()
