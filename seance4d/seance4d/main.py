@@ -137,8 +137,11 @@ def check_success(
         text_parser.parse(filename=OUTPUT_WAV)
 
         if text_parser.is_ready:
+            TextToSpeech.playback(
+                stopped=stopped, text_parser=None, filename="holding.mp3"
+            )
             ai_response = OpenAI.parse(text_parser.buffer)
-            TextToSpeech().playback(
+            TextToSpeech.speak_reply(
                 stopped=stopped, reply=ai_response, text_parser=text_parser
             )
 
@@ -289,13 +292,34 @@ def verbose() -> None:
     main(verbose_mode=True)
 
 
+@click.command()
+@click.argument("text")
+def generate_speech(text) -> None:
+    """
+    Generate a block of speech. For making pre-formed responses.
+    :return: None
+    """
+    TextToSpeech.generate_text(text=text, output_file="pregenerated.mp3")
+
+
+@click.command()
+def test_error() -> None:
+    """
+    Test error handling
+    :return: None
+    """
+    TextToSpeech.playback(stopped=None, text_parser=None, filename="error.mp3")
+
+
 @click.group()
 def cli():
     pass
 
 
 if __name__ == "__main__":
+    cli.add_command(generate_speech)
     cli.add_command(threshold_test)
     cli.add_command(run)
+    cli.add_command(test_error)
     cli.add_command(verbose)
     cli()
