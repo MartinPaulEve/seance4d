@@ -41,7 +41,7 @@ class TextParser:
                     print(f"Shutdown command received")
                     self.buffer = ""
                     self.is_ready = False
-                    os.system("shutdown /s /t 1")
+                    os.system("shutdown -h now")
 
                 if (
                     not self.found_prompt
