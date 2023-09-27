@@ -14,5 +14,6 @@ SYSTEM_PROMPT: str = (
 )
 
 OPENAI_KEY: str = (Path.home() / ".openai").read_text().strip()
+GOOGLE_KEY: str = (Path.home() / ".google").read_text().strip()
 
 MIN_VOL: int = int((Path.home() / ".minvol").read_text().strip())

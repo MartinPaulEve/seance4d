@@ -1,3 +1,8 @@
+try:
+    from seance4d.config import GOOGLE_KEY
+except ImportError:
+    from config import GOOGLE_KEY
+
 import os
 
 import speech_recognition as sr
@@ -29,7 +34,7 @@ class TextParser:
         with sr.AudioFile(filename) as source:
             # convert from speech to text
             try:
-                text = r.recognize_google(r.record(source))
+                text = r.recognize_google(r.record(source), key=GOOGLE_KEY)
 
                 if self.end_program_text.lower() in text.lower():
                     print(f"End program command received")
