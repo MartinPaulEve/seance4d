@@ -8,7 +8,7 @@ from gtts import gTTS
 
 class TextToSpeech:
     @staticmethod
-    def speak_reply(stopped: threading.Event | None, reply, text_parser):
+    def speak_reply(stopped: threading.Event, reply, text_parser):
         language = "en"
 
         try:
@@ -23,7 +23,7 @@ class TextToSpeech:
 
     @staticmethod
     def playback(
-        stopped: threading.Event | None,
+        stopped: threading.Event,
         text_parser,
         filename="response.mp3",
     ):
