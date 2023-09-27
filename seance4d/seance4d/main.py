@@ -32,9 +32,7 @@ FRAME_SIZE: int = 1024
 OUTPUT_WAV: str = "output.wav"
 
 # default text parser
-text_parser: TextParser = TextParser(
-    prompt_text="hello alicia", end_text="spirit hear me"
-)
+text_parser: TextParser = TextParser(prompt_text="hello", end_text="hear me")
 
 
 def main(threshold: bool = False, verbose_mode: bool = False) -> None:
@@ -232,7 +230,7 @@ def listen(stopped, q) -> None:
         indices = [
             (device_number, card_name)
             for device_number, card_name in enumerate(alsaaudio.cards())
-            if "C930e" in card_name or "USB" in card_name
+            if "C930e" in card_name or "Device" in card_name
         ]
 
         print("Using device:")
