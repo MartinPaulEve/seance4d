@@ -37,8 +37,9 @@ class TextToSpeech:
 
             filename = str(inp_file)
             print(f"Remapped to: {filename}")
+
         if stopped is not None:
-            stopped.set()
+            stopped.clear()
 
         if text_parser is not None:
             text_parser.reset()
@@ -51,7 +52,8 @@ class TextToSpeech:
         )
 
         if stopped is not None:
-            stopped.clear()
+            print("Flag cleared and listening process restarted")
+            stopped.set()
 
     @staticmethod
     def generate_text(text, language="en", output_file="response.mp3"):

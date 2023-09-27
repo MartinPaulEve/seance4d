@@ -42,6 +42,11 @@ def main(threshold: bool = False, verbose_mode: bool = False) -> None:
     :param verbose_mode: whether to display verbose information
     :return: None
     """
+    # load welcome vocal
+    TextToSpeech.playback(
+        stopped=None, text_parser=None, filename="welcome.mp3"
+    )
+
     stopped: threading.Event = threading.Event()
     q = Queue(maxsize=int(round(BUF_MAX_SIZE / CHUNK_SIZE)))
 
@@ -84,7 +89,7 @@ def record(
 
     while True:
         if stopped.wait(timeout=0):
-            break
+            pass
 
         chunk = q.get()
 
@@ -137,13 +142,21 @@ def check_success(
         text_parser.parse(filename=OUTPUT_WAV)
 
         if text_parser.is_ready:
-            TextToSpeech.playback(
-                stopped=stopped, text_parser=None, filename="holding.mp3"
-            )
-            ai_response = OpenAI.parse(text_parser.buffer)
-            TextToSpeech.speak_reply(
-                stopped=stopped, reply=ai_response, text_parser=text_parser
-            )
+            try:
+                TextToSpeech.playback(
+                    stopped=stopped, text_parser=None, filename="holding.mp3"
+                )
+                ai_response = OpenAI.parse(text_parser.buffer)
+                TextToSpeech.speak_reply(
+                    stopped=stopped, reply=ai_response, text_parser=text_parser
+                )
+            except Exception as e:
+                # playback an error file
+                TextToSpeech.playback(
+                    stopped=stopped,
+                    text_parser=text_parser,
+                    filename="error.mp3",
+                )
 
         # reset the wave file
         (
