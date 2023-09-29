@@ -13,7 +13,7 @@ class TextParser:
     def __init__(
         self,
         prompt_text="hello alicia",
-        end_text="spirit hear me",
+        end_text="hear me",
         end_program_text="end program",
         shutdown_text="stop it now",
     ):
@@ -59,7 +59,9 @@ class TextParser:
                     self.buffer = text.lower().split(self.prompt_text.lower())[
                         1
                     ]
-                elif (
+                    text = text.lower().split(self.prompt_text.lower())[1]
+
+                if (
                     self.found_prompt and self.end_text.lower() in text.lower()
                 ):
                     # if we have found the prompt, and we find the end text
