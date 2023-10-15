@@ -1,9 +1,12 @@
+import json
+
 try:
     from seance4d.config import GOOGLE_KEY
 except ImportError:
     from config import GOOGLE_KEY
 
 import os
+from importlib import resources as impresources
 
 import speech_recognition as sr
 from rich.pretty import pprint as print
@@ -24,6 +27,7 @@ class TextParser:
         self.found_prompt = False
         self.is_ready = False
         self.buffer = ""
+        self.cached_filename = ""
 
     def reset(self):
         self.__init__(prompt_text=self.prompt_text, end_text=self.end_text)
@@ -46,6 +50,22 @@ class TextParser:
                 )
 
     def handle_text(self, text):
+        """
+        Handle the text that has been parsed from the audio.
+        :param text: the text to handle
+        :return: None
+        """
+
+        # detect whether this is a cache entry
+        is_cached, filename, response = self._is_cached(text)
+
+        if is_cached:
+            print(f"Found cached response: {filename}")
+            self.buffer = response
+            self.is_ready = True
+            self.cached_filename = f"cached_{filename}"
+            return
+
         if self.end_program_text.lower() in text.lower():
             print(f"End program command received")
             self.buffer = ""
@@ -82,3 +102,41 @@ class TextParser:
             # if we haven't found the prompt yet, and we haven't found
             # the end text
             print(f"Audio discarded: {text}")
+
+    def _is_cached(self, text):
+        filename = "cached.json"
+
+        text_to_use = text.lower().replace(self.prompt_text, "")
+        text_to_use = text_to_use.replace(self.end_text, "")
+
+        # locate the cache file
+        try:
+            with open(filename):
+                pass
+        except FileNotFoundError:
+            print(f"Could not find {filename}. Trying local.")
+            inp_file = impresources.files("seance4d") / filename
+
+            filename = str(inp_file)
+            print(f"Remapped to: {filename}")
+
+        # load the cache file and search for the text
+        with open(filename, "r") as json_file:
+            json_data = json.load(json_file)
+
+            for item in json_data:
+                count = [
+                    (w, item["question"].split(" ").count(w))
+                    for w in set(item["question"].split(" "))
+                    if w in text_to_use
+                ]
+
+                if (
+                    len(count) > 3
+                    and len(count) >= len(set(text_to_use.split(" "))) - 1
+                ):
+                    # "we got one!"
+                    return True, item["file"], item["response"]
+
+        # no dice
+        return False, "", ""

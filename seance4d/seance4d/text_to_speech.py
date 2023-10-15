@@ -1,4 +1,3 @@
-import inspect
 import subprocess
 import threading
 from importlib import resources as impresources

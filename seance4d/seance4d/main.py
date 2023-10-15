@@ -21,7 +21,6 @@ except ImportError:
     from text_to_speech import TextToSpeech
     from config import MIN_VOL
 
-
 CHUNK_SIZE: int = 4096
 MIN_VOLUME: int = MIN_VOL
 BUF_MAX_SIZE: int = CHUNK_SIZE * 100
@@ -146,30 +145,46 @@ def check_success(
         text_parser.parse(filename=OUTPUT_WAV)
 
         if text_parser.is_ready:
-            try:
+            if text_parser.cached_filename != "":
+                print(f"ChatGPT cached: {text_parser.buffer}")
+                text_parser.buffer = ""
+
                 TextToSpeech.playback(
                     stopped=stopped,
                     text_parser=None,
-                    filename=f"Hmm{random.randint(1, 3)}.mp3",
+                    filename=text_parser.cached_filename,
                 )
 
-                ai_response = OpenAI.parse(text_parser.buffer)
-                print(f"ChatGPT: {ai_response}")
+                text_parser.cached_filename = ""
+            else:
+                try:
+                    TextToSpeech.playback(
+                        stopped=stopped,
+                        text_parser=None,
+                        filename=f"Hmm{random.randint(1, 3)}.mp3",
+                    )
 
-                TextToSpeech.playback(
-                    stopped=stopped, text_parser=None, filename="holding.mp3"
-                )
+                    ai_response = OpenAI.parse(text_parser.buffer)
+                    print(f"ChatGPT: {ai_response}")
 
-                TextToSpeech.speak_reply(
-                    stopped=stopped, reply=ai_response, text_parser=text_parser
-                )
-            except Exception as e:
-                # playback an error file
-                TextToSpeech.playback(
-                    stopped=stopped,
-                    text_parser=text_parser,
-                    filename="error.mp3",
-                )
+                    TextToSpeech.playback(
+                        stopped=stopped,
+                        text_parser=None,
+                        filename="holding.mp3",
+                    )
+
+                    TextToSpeech.speak_reply(
+                        stopped=stopped,
+                        reply=ai_response,
+                        text_parser=text_parser,
+                    )
+                except Exception as e:
+                    # playback an error file
+                    TextToSpeech.playback(
+                        stopped=stopped,
+                        text_parser=text_parser,
+                        filename="error.mp3",
+                    )
 
         # reset the wave file
         (
@@ -330,17 +345,49 @@ def test_prompt(prompt) -> None:
     """
     Test a prompt and give the ChatGPT response
     """
-    TextToSpeech.playback(
-        stopped=None,
-        text_parser=None,
-        filename=f"Hmm{random.randint(1, 3)}.mp3",
-    )
-
     text_parser.handle_text(prompt)
 
     if text_parser.is_ready:
-        ai_response = OpenAI.parse(prompt)
-        print(f"ChatGPT: {ai_response}")
+        if text_parser.cached_filename != "":
+            print(f"ChatGPT cached: {text_parser.buffer}")
+            text_parser.buffer = ""
+
+            TextToSpeech.playback(
+                stopped=None,
+                text_parser=None,
+                filename=text_parser.cached_filename,
+            )
+
+            text_parser.cached_filename = ""
+        else:
+            try:
+                TextToSpeech.playback(
+                    stopped=None,
+                    text_parser=None,
+                    filename=f"Hmm{random.randint(1, 3)}.mp3",
+                )
+
+                ai_response = OpenAI.parse(text_parser.buffer)
+                print(f"ChatGPT: {ai_response}")
+
+                TextToSpeech.playback(
+                    stopped=None,
+                    text_parser=None,
+                    filename="holding.mp3",
+                )
+
+                TextToSpeech.speak_reply(
+                    stopped=None,
+                    reply=ai_response,
+                    text_parser=text_parser,
+                )
+            except Exception as e:
+                # playback an error file
+                TextToSpeech.playback(
+                    stopped=None,
+                    text_parser=text_parser,
+                    filename="error.mp3",
+                )
     else:
         print(
             f"Command not recognised. Perhaps you "
