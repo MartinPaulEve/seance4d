@@ -1,3 +1,4 @@
+import json
 import sys
 import threading
 import wave
@@ -294,7 +295,6 @@ def listen(stopped, q) -> None:
 def threshold_test():
     """
     Run in threshold test mode
-    :return: None
     """
     main(threshold=True)
 
@@ -303,7 +303,6 @@ def threshold_test():
 def run() -> None:
     """
     Run in normal mode
-    :return: None
     """
     main(threshold=False)
 
@@ -312,7 +311,6 @@ def run() -> None:
 def verbose() -> None:
     """
     Run in verbose mode
-    :return: None
     """
     main(verbose_mode=True)
 
@@ -322,7 +320,6 @@ def verbose() -> None:
 def generate_speech(text) -> None:
     """
     Generate a block of speech. For making pre-formed responses.
-    :return: None
     """
     TextToSpeech.generate_text(text=text, output_file="pregenerated.mp3")
 
@@ -332,7 +329,6 @@ def generate_speech(text) -> None:
 def test_prompt(prompt) -> None:
     """
     Test a prompt and give the ChatGPT response
-    :return: None
     """
     TextToSpeech.playback(
         stopped=None,
@@ -353,10 +349,49 @@ def test_prompt(prompt) -> None:
 
 
 @click.command()
+@click.argument("input_file")
+def augment_cache(input_file) -> None:
+    """
+    Add ChatGPT responses to a cache file
+    """
+    with open(input_file, "r") as json_file:
+        json_data = json.load(json_file)
+
+        for item in json_data:
+            try:
+                ai_response = OpenAI.parse(item["question"])
+                item["response"] = ai_response
+            except Exception as e:
+                print(f"Error: {e}")
+                item["response"] = "ERROR"
+
+    with open(input_file, "w") as json_file:
+        json.dump(json_data, json_file)
+
+
+@click.command()
+@click.argument("input_file")
+def generate_cache_speech(input_file) -> None:
+    """
+    Create speech files for each entry in a cache file
+    """
+    with open(input_file, "r") as json_file:
+        json_data = json.load(json_file)
+
+        for item in json_data:
+            try:
+                TextToSpeech.generate_text(
+                    text=item["response"], output_file=f"cached_{item['file']}"
+                )
+                print(f"Generated {item['file']}")
+            except Exception as e:
+                print(f"Error generating {item['file']}: {e}")
+
+
+@click.command()
 def test_error() -> None:
     """
     Test error handling
-    :return: None
     """
     TextToSpeech.playback(stopped=None, text_parser=None, filename="error.mp3")
 
@@ -367,10 +402,12 @@ def cli():
 
 
 if __name__ == "__main__":
+    cli.add_command(augment_cache)
+    cli.add_command(generate_cache_speech)
     cli.add_command(generate_speech)
-    cli.add_command(threshold_test)
     cli.add_command(run)
     cli.add_command(test_error)
     cli.add_command(test_prompt)
+    cli.add_command(threshold_test)
     cli.add_command(verbose)
     cli()
