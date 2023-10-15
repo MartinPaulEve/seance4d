@@ -103,11 +103,17 @@ class TextParser:
             # the end text
             print(f"Audio discarded: {text}")
 
-    def _is_cached(self, text):
+    def _is_cached(self, text: str):
         filename = "cached.json"
 
-        text_to_use = text.lower().replace(self.prompt_text, "")
+        text_to_use: str = text.lower().replace(self.prompt_text, "")
         text_to_use = text_to_use.replace(self.end_text, "")
+        text_to_use = text_to_use.replace("alicia ", "")
+        text_to_use = text_to_use.replace("please ", "")
+        text_to_use = text_to_use.replace("  ", " ")
+        text_to_use = text_to_use.strip()
+
+        print(f"Checking cached comparator text: {text_to_use}")
 
         # locate the cache file
         try:
@@ -133,7 +139,7 @@ class TextParser:
 
                 if (
                     len(count) > 3
-                    and len(count) >= len(set(text_to_use.split(" "))) - 1
+                    and len(count) >= len(set(text_to_use.split(" "))) - 2
                 ):
                     # "we got one!"
                     return True, item["file"], item["response"]
