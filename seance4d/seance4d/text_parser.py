@@ -12,7 +12,7 @@ from rich.pretty import pprint as print
 class TextParser:
     def __init__(
         self,
-        prompt_text="hello alicia",
+        prompt_text="greetings",
         end_text="hear me",
         end_program_text="end program",
         shutdown_text="stop it now",
@@ -36,47 +36,7 @@ class TextParser:
             try:
                 text = r.recognize_google(r.record(source), key=GOOGLE_KEY)
 
-                if self.end_program_text.lower() in text.lower():
-                    print(f"End program command received")
-                    self.buffer = ""
-                    self.is_ready = False
-                    os._exit(0)
-
-                if self.shutdown_text.lower() in text.lower():
-                    print(f"Shutdown command received")
-                    self.buffer = ""
-                    self.is_ready = False
-                    os.system("shutdown -h now")
-
-                if (
-                    not self.found_prompt
-                    and self.prompt_text.lower() in text.lower()
-                ):
-                    # if we haven't found the prompt yet, and we find it
-                    print(f"Starting with {text}")
-
-                    self.found_prompt = True
-                    self.buffer = text.lower().split(self.prompt_text.lower())[
-                        1
-                    ]
-                    text = text.lower().split(self.prompt_text.lower())[1]
-
-                if (
-                    self.found_prompt and self.end_text.lower() in text.lower()
-                ):
-                    # if we have found the prompt, and we find the end text
-                    print(f"Ending with {text}")
-                    self.buffer += text.lower().split(self.end_text.lower())[0]
-                    self.is_ready = True
-                elif self.found_prompt:
-                    # if we have found the prompt, and we haven't found the
-                    # end text
-                    print(f"Appending {text}")
-                    self.buffer += text
-                else:
-                    # if we haven't found the prompt yet, and we haven't found
-                    # the end text
-                    print(f"Audio discarded: {text}")
+                self.handle_text(text)
             except sr.UnknownValueError:
                 print(f"Ditching indecipherable text")
             except sr.RequestError as e:
@@ -84,3 +44,41 @@ class TextParser:
                     f"Could not request results from Google Speech "
                     f"Recognition service; {e}"
                 )
+
+    def handle_text(self, text):
+        if self.end_program_text.lower() in text.lower():
+            print(f"End program command received")
+            self.buffer = ""
+            self.is_ready = False
+            os._exit(0)
+
+        if self.shutdown_text.lower() in text.lower():
+            print(f"Shutdown command received")
+            self.buffer = ""
+            self.is_ready = False
+            os.system("shutdown -h now")
+
+        if not self.found_prompt and self.prompt_text.lower() in text.lower():
+            # if we haven't found the prompt yet, and we find it
+            print(f"Starting with {text}")
+
+            self.found_prompt = True
+            self.buffer = text.lower().split(self.prompt_text.lower())[1]
+            text = text.lower().split(self.prompt_text.lower())[1]
+
+        if self.found_prompt and self.end_text.lower() in text.lower():
+            # if we have found the prompt, and we find the end text
+            print(f"Ending with {text}")
+            self.buffer += text.lower().split(self.end_text.lower())[0]
+            self.is_ready = True
+
+        elif self.found_prompt:
+            # if we have found the prompt, and we haven't found the
+            # end text
+            print(f"Appending {text}")
+            self.buffer += text
+
+        else:
+            # if we haven't found the prompt yet, and we haven't found
+            # the end text
+            print(f"Audio discarded: {text}")

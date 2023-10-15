@@ -3,6 +3,7 @@ import threading
 import wave
 from array import array
 from queue import Queue, Full
+import random
 
 import alsaaudio
 import click
@@ -33,7 +34,7 @@ OUTPUT_WAV: str = "output.wav"
 
 # default text parser
 text_parser: TextParser = TextParser(
-    prompt_text="hello alicia", end_text="hear me"
+    prompt_text="greetings", end_text="hear me"
 )
 
 
@@ -146,9 +147,18 @@ def check_success(
         if text_parser.is_ready:
             try:
                 TextToSpeech.playback(
+                    stopped=stopped,
+                    text_parser=None,
+                    filename=f"Hmm{random.randint(1, 3)}.mp3",
+                )
+
+                ai_response = OpenAI.parse(text_parser.buffer)
+                print(f"ChatGPT: {ai_response}")
+
+                TextToSpeech.playback(
                     stopped=stopped, text_parser=None, filename="holding.mp3"
                 )
-                ai_response = OpenAI.parse(text_parser.buffer)
+
                 TextToSpeech.speak_reply(
                     stopped=stopped, reply=ai_response, text_parser=text_parser
                 )
@@ -318,6 +328,31 @@ def generate_speech(text) -> None:
 
 
 @click.command()
+@click.argument("prompt")
+def test_prompt(prompt) -> None:
+    """
+    Test a prompt and give the ChatGPT response
+    :return: None
+    """
+    TextToSpeech.playback(
+        stopped=None,
+        text_parser=None,
+        filename=f"Hmm{random.randint(1, 3)}.mp3",
+    )
+
+    text_parser.handle_text(prompt)
+
+    if text_parser.is_ready:
+        ai_response = OpenAI.parse(prompt)
+        print(f"ChatGPT: {ai_response}")
+    else:
+        print(
+            f"Command not recognised. Perhaps you "
+            f"needed {text_parser.prompt_text} QUERY {text_parser.end_text}?"
+        )
+
+
+@click.command()
 def test_error() -> None:
     """
     Test error handling
@@ -336,5 +371,6 @@ if __name__ == "__main__":
     cli.add_command(threshold_test)
     cli.add_command(run)
     cli.add_command(test_error)
+    cli.add_command(test_prompt)
     cli.add_command(verbose)
     cli()

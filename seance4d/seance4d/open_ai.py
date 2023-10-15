@@ -29,5 +29,4 @@ class OpenAI:
 
         reply = chat.choices[0].message.content
 
-        print(f"ChatGPT: {reply}")
         return reply
