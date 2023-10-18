@@ -40,7 +40,7 @@ class TextParser:
             try:
                 text = r.recognize_google(r.record(source), key=GOOGLE_KEY)
 
-                self.handle_text(text)
+                self._handle_text(text)
             except sr.UnknownValueError:
                 print(f"Ditching indecipherable text")
             except sr.RequestError as e:
@@ -49,7 +49,7 @@ class TextParser:
                     f"Recognition service; {e}"
                 )
 
-    def handle_text(self, text):
+    def _handle_text(self, text):
         """
         Handle the text that has been parsed from the audio.
         :param text: the text to handle
@@ -62,8 +62,8 @@ class TextParser:
         if is_cached:
             print(f"Found cached response: {filename}")
             self.buffer = response
-            self.is_ready = True
             self.cached_filename = f"cached_{filename}"
+            self.is_ready = True
             return
 
         if self.end_program_text.lower() in text.lower():

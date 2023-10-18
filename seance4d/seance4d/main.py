@@ -145,13 +145,16 @@ def check_success(
         text_parser.parse(filename=OUTPUT_WAV)
 
         if text_parser.is_ready:
+            if stopped is not None:
+                stopped.set()
+
             if text_parser.cached_filename != "":
                 print(f"ChatGPT cached: {text_parser.buffer}")
                 text_parser.buffer = ""
 
                 TextToSpeech.playback(
                     stopped=stopped,
-                    text_parser=None,
+                    text_parser=text_parser,
                     filename=text_parser.cached_filename,
                 )
 
@@ -195,7 +198,8 @@ def check_success(
             wf,
         ) = set_variables()
 
-        stopped.clear()
+        if stopped is not None:
+            stopped.clear()
 
     return current_fail_count, current_voice_count, wf
 
@@ -345,7 +349,7 @@ def test_prompt(prompt) -> None:
     """
     Test a prompt and give the ChatGPT response
     """
-    text_parser.handle_text(prompt)
+    text_parser._handle_text(prompt)
 
     if text_parser.is_ready:
         if text_parser.cached_filename != "":
