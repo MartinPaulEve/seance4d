@@ -17,7 +17,7 @@ class TextParser:
         self,
         prompt_text="greetings",
         end_text="hear me",
-        end_program_text="end program",
+        end_program_text="come back",
         shutdown_text="stop it now",
     ):
         self.prompt_text = prompt_text
