@@ -61,6 +61,9 @@ class TextParser:
 
         if is_cached:
             print(f"Found cached response: {filename}")
+
+            # this order matters
+            # you will hit a race condition if you set is_ready to True earlier
             self.buffer = response
             self.cached_filename = f"cached_{filename}"
             self.is_ready = True
